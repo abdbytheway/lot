@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lot Size Calculator</title>
+    <style>
+        /* CSS Reset and Font Import */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, #D3EE98, #ffffff);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            padding: 0 20px;
+        }
+
+        /* Bounce Animation */
+        @keyframes bounceIn {
+            0% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+            60% {
+                transform: translateY(-30px);
+                opacity: 1;
+            }
+            80% {
+                transform: translateY(10px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        /* Rotation Animation */
+        @keyframes rotateGif {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .calculator-container {
+            background-color: #ffffff;
+            padding: 30px 35px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            text-align: center;
+            border-top: 6px solid #72BF78;
+            position: relative;
+            /* Apply bounce animation */
+            animation: bounceIn 1s ease-out;
+        }
+
+        .gif-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .gif-container img {
+            width: 70px;
+            height: auto;
+            border-radius: 50%;
+            /* Apply rotation animation */
+            animation: rotateGif 5s linear infinite;
+        }
+
+        h2 {
+            color: #72BF78;
+            font-weight: 600;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 600;
+            margin-top: 12px;
+            display: block;
+            color: #4d4d4d;
+            text-align: left;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid #D3EE98;
+            border-radius: 5px;
+            font-size: 15px;
+            color: #333;
+            background-color: #f9f9f9;
+            transition: border 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: #72BF78;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #72BF78;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #6EC207;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #D3EE98;
+            font-weight: 600;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .result p {
+            margin: 8px 0;
+            color: #72BF78;
+        }
+
+        .footer-text {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <!-- GIF section -->
+        <div class="gif-container">
+            <img src="https://res.cloudinary.com/dzt3tudwf/image/upload/v1730354057/ezgif-4-c075ae56cb_gn8m0k.gif" alt="Welcome">
+        </div>
+
+        <h2>Lot Size Calculator</h2>
+        
+        <label for="balance">Account Balance (USD):</label>
+        <input type="number" id="balance" placeholder="Enter account balance">
+        
+        <label for="risk">Risk Percentage (%):</label>
+        <input type="number" id="risk" placeholder="Enter risk percentage">
+        
+        <label for="stopLoss">Stop Loss (Pips):</label>
+        <input type="number" id="stopLoss" placeholder="Enter stop loss in pips">
+        
+        <label for="pair">Select Pair:</label>
+        <select id="pair">
+            <option value="XAUUSD">XAUUSD</option>
+            <option value="EURUSD">EURUSD</option>
+            <option value="NAS100">NAS100</option>
+            <option value="US30">US30</option>
+        </select>
+        
+        <button onclick="calculateLotSize()">Calculate Lot Size</button>
+
+        <div class="result" id="result"></div>
+
+        <!-- Footer text -->
+        <div class="footer-text">
+            © 2024 Cicada Risk Management Tool. All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        // JavaScript Calculation
+        function calculateLotSize() {
+            const balance = parseFloat(document.getElementById('balance').value);
+            const risk = parseFloat(document.getElementById('risk').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            const pair = document.getElementById('pair').value;
+            const resultDiv = document.getElementById('result');
+
+            if (isNaN(balance) || isNaN(risk) || isNaN(stopLoss) || balance <= 0 || risk <= 0 || stopLoss <= 0) {
+                resultDiv.innerHTML = `<p>Please enter valid inputs.</p>`;
+                return;
+            }
+
+            let pipValue;
+
+            // Approximate pip value per standard lot based on pair
+            switch(pair) {
+                case "XAUUSD":
+                    pipValue = 1; // $1 per pip for XAUUSD (Gold)
+                    break;
+                case "EURUSD":
+                    pipValue = 10; // $10 per pip for EURUSD per standard lot
+                    break;
+                case "NAS100":
+                    pipValue = 0.1; // $0.1 per pip for NAS100 per standard lot
+                    break;
+                case "US30":
+                    pipValue = 1; // $1 per pip for US30 per standard lot
+                    break;
+                default:
+                    pipValue = 10; // Fallback value
+            }
+
+            // Calculate risk amount in USD
+            const riskAmount = (balance * risk) / 100;
+
+            // Calculate lot sizes
+            const lotSizeStandard = riskAmount / (stopLoss * pipValue);
+            const lotSizeMini = lotSizeStandard * 10; // 1 mini lot = 0.1 standard lot
+            const lotSizeMicro = lotSizeStandard * 100; // 1 micro lot = 0.01 standard lot
+
+            // Calculate the 50% profit point in pips
+            const profitTarget = (riskAmount * 0.5) / (lotSizeStandard * pipValue);
+
+            resultDiv.innerHTML = `
+                <p><strong>Standard Lot:</strong> ${lotSizeStandard.toFixed(2)} lots</p>
+                <p><strong>Mini Lot:</strong> ${lotSizeMini.toFixed(2)} lots</p>
+                <p><strong>Micro Lot:</strong> ${lotSizeMicro.toFixed(2)} lots</p>
+                <p><strong>50% Profit Point:</strong> ${profitTarget.toFixed(2)} pips</p>
+            `;
+        }
+    </script>
+</body>
+</html>
